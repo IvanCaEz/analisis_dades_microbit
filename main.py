@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
+
 
 def get_data() -> pd.DataFrame:
     # Read data from CSV file and make a dataframe using pandas
@@ -25,43 +27,77 @@ list_of_intervals = [first_interval, second_interval, third_interval]
 
 def all_data(list_of_intervals: list):
     for interval in list_of_intervals:
-        plt.title('interval {}'.format(interval['interval'].iloc[0])) # Automatically gets the interval number
+        plt.title('Interval {}'.format(interval['interval'].iloc[0])) # Automatically gets the interval number
         # Plot all data except Time and sample-id
         plt.plot(interval.loc[:, ~interval.columns.isin(['Time (seconds)', 'sample-id'])])
         plt.xlabel('Sample ID')
         plt.ylabel('Values')
         plt.legend(interval.loc[:, ~interval.columns.isin(['Time (seconds)', 'sample-id'])])
+        plt.get_current_fig_manager().window.state('zoomed')
+        plt.savefig('charts/plot_alldata{}.png'.format(interval['interval'].iloc[0]), dpi=200)
         plt.show()
     
 
-def correlations(data: pd.DataFrame):
-    print(data.corr())
-    
-
 def historic_temperatura(list_of_intervals: list):
-    fig, axs = plt.subplots(len(list_of_intervals), 1)
-    for i, interval in enumerate(list_of_intervals):
-        axs[i].set_title('interval {}'.format(interval['interval'].iloc[0])) # Automatically gets the interval number 
-        # Convert the seconds to hours to make the plot more readable
-        axs[i].scatter(interval['Time (seconds)']/3600, interval['temp'], label='Temperature', color='orange')
-        # Set the ticks of the y axis to be more readable
-        axs[i].set_yticks(np.arange(interval['temp'].min(), interval['temp'].max()+1, 1))
-        
-    axs[1].set_ylabel('Temperature (ºC)')
-    fig.suptitle('Temperature over time')
-    plt.xlabel('Time (hours)')
+    # Convert the seconds to minutes to make the plot more readable
+    plt.scatter(list_of_intervals[0]['Time (seconds)']/60, list_of_intervals[0]['temp'], color='pink')
+    plt.scatter(list_of_intervals[1]['Time (seconds)']/60, list_of_intervals[1]['temp'], color='orange')
+    plt.scatter(list_of_intervals[2]['Time (seconds)']/60, list_of_intervals[2]['temp'], color='green')
+
+    # Set the ticks of the y axis to be more readable
+    plt.yticks(np.arange(24, 35, 1))        
+    plt.ylabel('Temperature (ºC)')
+    plt.suptitle('Temperature over time')
+    plt.xlabel('Time (minutes)')
+    plt.xticks(np.arange(0, 240, 15))
+    plt.legend(['Interval 1', 'Interval 2', 'Interval 3'])
+    plt.grid(True)
+    plt.get_current_fig_manager().window.state('zoomed')
+    plt.savefig('charts/scatter_temperature.png', bbox_inches ="tight", dpi=200)
+
     plt.show()
+
         
 def historic_light(list_of_intervals: list):
     fig, axs = plt.subplots(len(list_of_intervals), 1)
-    for i, interval in enumerate(list_of_intervals):
-
-        axs[i].plot(interval['Time (seconds)']/3600, interval['light'], label='Light', marker='o', color='green')
-        axs[i].set_title('interval {}'.format(interval['interval'].iloc[0]))
+    bins = np.linspace(0, 300, 3) 
+    labels = ['Dark', 'Light']
     
-    axs[1].set_ylabel('Light')
-    fig.suptitle('Ligth over time')
-    plt.xlabel('Time (hours)')
+    for i, interval in enumerate(list_of_intervals):
+        
+        axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
+        
+        binned = pd.cut(interval['light'], bins=bins, labels=labels, right=False)  # Set right=False to include the rightmost edge
+        # Count the number of values in each bin
+        counts = binned.value_counts()
+        # Remove the labels that are 0%
+        counts = counts[counts != 0]
+        # Plot the bar chart
+        axs[i].barh(counts.index, counts, edgecolor='black', color='yellow')  # Swap the arguments for barh
+    
+    
+    axs[1].set_ylabel('Light level (lux)')
+    fig.suptitle('Light level')
+    plt.xlabel('Nº of measurements')
+    plt.get_current_fig_manager().window.state('zoomed')
+    plt.subplots_adjust(hspace=0.55)
+    plt.savefig('charts/barh_light.png', bbox_inches ="tight", dpi=200)
+    plt.show()
+    
+    
+def historic_sound(list_of_intervals: list):
+    fig, axs = plt.subplots(1, len(list_of_intervals), sharex=True)
+    for i, interval in enumerate(list_of_intervals):
+        
+        axs[i].hist(interval['sound-level'], color='gray', edgecolor='black')
+        axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
+        axs[i].set_xticks(np.arange(0, 220, 20))
+    
+    axs[1].set_xlabel('Sound level (dB)')
+    axs[0].set_ylabel('Nº of measurements')
+    fig.suptitle('Sound level')
+    plt.get_current_fig_manager().window.state('zoomed')
+    plt.savefig('charts/hist_sound_level.png', bbox_inches ="tight", dpi=200)
     plt.show()
         
 
@@ -80,13 +116,13 @@ def historic_compass_heading(list_of_intervals: list):
         counts = counts[counts != 0]
         # Plot the pie chart
         axs[i].pie(counts, labels=counts.index, autopct='%1.1f%%', pctdistance=0.8)
-        axs[i].set_title('interval {}'.format(interval['interval'].iloc[0]))
+        axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
         centre_circle = plt.Circle((0, 0), 0.65, fc='white')
         axs[i].add_artist(centre_circle)
     
-    
-
     fig.suptitle('Compass heading')
+    plt.get_current_fig_manager().window.state('zoomed')
+    plt.savefig('charts/pie_compass_heading.png', dpi=200)
     plt.show()
 
        
@@ -95,9 +131,10 @@ def print_menu():
     print('1. All data')
     print('2. Temperature')
     print('3. Light')
-    print('4. Compass heading')
-
-    print('9. Exit')
+    print('4. Sound level')
+    print('5. Accelerometer')
+    print('6. Compass heading')
+    print('7. Exit')
     return int(input('Option: '))
 
 def menu():
@@ -109,13 +146,15 @@ def menu():
             historic_temperatura(list_of_intervals)
         elif option == 3:
             historic_light(list_of_intervals)
-        elif option == 8:
+        elif option == 4:
+            historic_sound(list_of_intervals)
+        elif option == 6:
             historic_compass_heading(list_of_intervals)
-        elif option == 9:
+        elif option == 7:
             print('Exiting...')
             break
         else:
             pass
         
-historic_compass_heading(list_of_intervals)
+menu()
 
