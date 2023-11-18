@@ -24,8 +24,10 @@ third_interval = data_by_interval.get_group(3)
 # Make a list of intervals
 list_of_intervals = [first_interval, second_interval, third_interval]
 
+print(plt.style.available)
 
 def all_data(list_of_intervals: list):
+    plt.style.use('fivethirtyeight')
     for interval in list_of_intervals:
         plt.title('Interval {}'.format(interval['interval'].iloc[0])) # Automatically gets the interval number
         # Plot all data except Time and sample-id
@@ -40,9 +42,11 @@ def all_data(list_of_intervals: list):
 
 def historic_temperatura(list_of_intervals: list):
     # Convert the seconds to minutes to make the plot more readable
-    plt.scatter(list_of_intervals[0]['Time (seconds)']/60, list_of_intervals[0]['temp'], color='pink')
-    plt.scatter(list_of_intervals[1]['Time (seconds)']/60, list_of_intervals[1]['temp'], color='orange')
-    plt.scatter(list_of_intervals[2]['Time (seconds)']/60, list_of_intervals[2]['temp'], color='green')
+    plt.style.use('fivethirtyeight')
+
+    plt.scatter(list_of_intervals[0]['Time (seconds)']/60, list_of_intervals[0]['temp'], color='pink', edgecolor='black')
+    plt.scatter(list_of_intervals[1]['Time (seconds)']/60, list_of_intervals[1]['temp'], color='orange', edgecolor='black')
+    plt.scatter(list_of_intervals[2]['Time (seconds)']/60, list_of_intervals[2]['temp'], color='green', edgecolor='black')
 
     # Set the ticks of the y axis to be more readable
     plt.yticks(np.arange(24, 35, 1))        
@@ -59,22 +63,28 @@ def historic_temperatura(list_of_intervals: list):
 
         
 def historic_light(list_of_intervals: list):
+    plt.style.use('fivethirtyeight')
     fig, axs = plt.subplots(len(list_of_intervals), 1)
     bins = np.linspace(0, 300, 3) 
     labels = ['Dark', 'Light']
+    colors = ['#6a5acd', '#ffc61a']
     
     for i, interval in enumerate(list_of_intervals):
         
         axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
         
-        binned = pd.cut(interval['light'], bins=bins, labels=labels, right=False)  # Set right=False to include the rightmost edge
+        binned = pd.cut(interval['light'], bins=bins, labels=labels,  right=False)  # Set right=False to include the rightmost edge
         # Count the number of values in each bin
         counts = binned.value_counts()
         # Remove the labels that are 0%
         counts = counts[counts != 0]
-        # Plot the bar chart
-        axs[i].barh(counts.index, counts, edgecolor='black', color='yellow')  # Swap the arguments for barh
-    
+        
+        axs[i].barh(counts.index, counts, color=colors, edgecolor='black') 
+        # Calculate the percentage for each bin
+        percentages = counts / counts.sum() * 100
+        # Add percentage labels to the bars
+        for j, (count, percentage) in enumerate(zip(counts, percentages)):
+            axs[i].text(count, j, f' {percentage:.1f}%', va='center')
     
     axs[1].set_ylabel('Light level (lux)')
     fig.suptitle('Light level')
@@ -86,12 +96,18 @@ def historic_light(list_of_intervals: list):
     
     
 def historic_sound(list_of_intervals: list):
+    plt.style.use('fivethirtyeight')
+
     fig, axs = plt.subplots(1, len(list_of_intervals), sharex=True)
     for i, interval in enumerate(list_of_intervals):
         
         axs[i].hist(interval['sound-level'], color='gray', edgecolor='black')
         axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
         axs[i].set_xticks(np.arange(0, 220, 20))
+        axs[i].axvline(x=70, color='red', label='Threshold')
+        axs[i].axvline(x=interval['sound-level'].mean(), color='orange', label='Mean')
+    
+    plt.legend()
     
     axs[1].set_xlabel('Sound level (dB)')
     axs[0].set_ylabel('Nº of measurements')
