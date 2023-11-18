@@ -2,13 +2,13 @@
 Data analysis of Micro:bit with maplotlib, numpy and pandas
 
 # Table of Contents
-[All data](#all-data)
-[Temperature](#temperature)
-[Light](#light)
-[Sound](#sound)
-[Acceleration](#acceleration)
-[Compass Heading](#compass-heading)
-[Correlation Heatmap](#correlation-heatmap)
+- [All data](#all-data)
+- [Temperature](#temperature)
+- [Light](#light)
+- [Sound](#sound)
+- [Acceleration](#acceleration)
+- [Compass Heading](#compass-heading)
+- [Correlation Heatmap](#correlation-heatmap)
 
 ---
 
@@ -46,3 +46,6 @@ This pie chart compares the percentage of times the microbit has pointed in whic
 ![Compass heading chart](charts/fullscreen/pie_compass_heading_fullscreen.png)
 
 # Correlation Heatmap
+This graph shows the correlation heatmap between each field in each interval.
+
+![Correlation Heatmap chart](charts/fullscreen/corr_heatmap_fullscreen.png)
