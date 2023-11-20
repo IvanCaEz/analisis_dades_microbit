@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# Student: Ivan Martinez
+
 def get_data() -> pd.DataFrame:
     # Read data from CSV file and make a dataframe using pandas
     dataframe = pd.read_csv('data/microbit_sensor.csv')
