@@ -11,7 +11,6 @@ def get_data() -> pd.DataFrame:
     # Now I can group the data by measurement and return the grouped object to make the plots
     data_by_interval = dataframe.groupby('interval')
     # Get the number of intervals by counting the number of groups
-    print(data_by_interval.ngroups)
     return data_by_interval
 
 data_by_interval = get_data()
@@ -22,8 +21,6 @@ third_interval = data_by_interval.get_group(3)
 # Make a list of intervals
 list_of_intervals = [first_interval, second_interval, third_interval]
 
-print(plt.style.available)
-
 def all_data(list_of_intervals: list):
     plt.style.use('fivethirtyeight')
     for interval in list_of_intervals:
@@ -33,14 +30,13 @@ def all_data(list_of_intervals: list):
         plt.xlabel('Sample ID')
         plt.ylabel('Values')
         plt.legend(interval.loc[:, ~interval.columns.isin(['Time (seconds)', 'sample-id'])])
-        plt.get_current_fig_manager().window.state('zoomed')
+        # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
         plt.savefig('charts/plot_alldata{}.png'.format(interval['interval'].iloc[0]), dpi=200)
         plt.show()
     
 def historic_temperature(list_of_intervals: list):
     # Convert the seconds to minutes to make the plot more readable
     plt.style.use('fivethirtyeight')
-
     plt.scatter(list_of_intervals[0]['Time (seconds)']/60, list_of_intervals[0]['temp'], color='pink', edgecolor='black')
     plt.scatter(list_of_intervals[1]['Time (seconds)']/60, list_of_intervals[1]['temp'], color='orange', edgecolor='black')
     plt.scatter(list_of_intervals[2]['Time (seconds)']/60, list_of_intervals[2]['temp'], color='green', edgecolor='black')
@@ -52,7 +48,7 @@ def historic_temperature(list_of_intervals: list):
     plt.xticks(np.arange(0, 240, 15))
     plt.legend(['Interval 1', 'Interval 2', 'Interval 3'])
     plt.grid(True)
-    plt.get_current_fig_manager().window.state('zoomed')
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/scatter_temperature.png', bbox_inches ="tight", dpi=200)
     plt.show()
     
@@ -80,8 +76,8 @@ def historic_light(list_of_intervals: list):
     axs[1].set_ylabel('Light level (lux)')
     fig.suptitle('Light level', fontsize=16)
     plt.xlabel('Nº of measurements')
-    plt.get_current_fig_manager().window.state('zoomed')
     plt.subplots_adjust(hspace=0.55)
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/barh_light.png', bbox_inches ="tight", dpi=200)
     plt.show()
      
@@ -101,7 +97,7 @@ def historic_sound(list_of_intervals: list):
     axs[1].set_xlabel('Sound level (dB)')
     axs[0].set_ylabel('Nº of measurements')
     fig.suptitle('Sound level', fontsize=16)
-    plt.get_current_fig_manager().window.state('zoomed')
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/hist_sound_level.png', bbox_inches ="tight", dpi=200)
     plt.show()
     
@@ -125,25 +121,25 @@ def historic_acceleration(list_of_intervals: list):
         min_y = interval['sample-id'][interval['acc-y'].idxmin()]
         min_z = interval['sample-id'][interval['acc-z'].idxmin()]
         # Annotate the values
-        axs[i].annotate(f'Max: {interval['acc-x'].max()}', xy=(max_x, interval['acc-x'].max()), xytext=(max_x, interval['acc-x'].max() + 750),
+        axs[i].annotate('Max: {}'.format(interval['acc-x'].max()), xy=(max_x, interval['acc-x'].max()), xytext=(max_x, interval['acc-x'].max() + 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
-        axs[i].annotate(f'Max: {interval['acc-y'].max()}', xy=(max_y, interval['acc-y'].max()), xytext=(max_y, interval['acc-y'].max() + 750),
+        axs[i].annotate('Max: {}'.format(interval['acc-y'].max()), xy=(max_y, interval['acc-y'].max()), xytext=(max_y, interval['acc-y'].max() + 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
-        axs[i].annotate(f'Max: {interval['acc-z'].max()}', xy=(max_z, interval['acc-z'].max()), xytext=(max_z, interval['acc-z'].max() + 750),
+        axs[i].annotate('Max: {}'.format(interval['acc-z'].max()), xy=(max_z, interval['acc-z'].max()), xytext=(max_z, interval['acc-z'].max() + 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
-        axs[i].annotate(f'Min: {interval['acc-x'].min()}', xy=(min_x, interval['acc-x'].min()), xytext=(min_x, interval['acc-x'].min() - 750),
+        axs[i].annotate('Min: {}'.format(interval['acc-x'].min()), xy=(min_x, interval['acc-x'].min()), xytext=(min_x, interval['acc-x'].min() - 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
-        axs[i].annotate(f'Min: {interval['acc-y'].min()}', xy=(min_y, interval['acc-y'].min()), xytext=(min_y, interval['acc-y'].min() - 750),
+        axs[i].annotate('Min: {}'.format(interval['acc-y'].min()), xy=(min_y, interval['acc-y'].min()), xytext=(min_y, interval['acc-y'].min() - 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
-        axs[i].annotate(f'Min: {interval['acc-z'].min()}', xy=(min_z, interval['acc-z'].min()), xytext=(min_z, interval['acc-z'].min() - 750),
+        axs[i].annotate('Min: {}'.format(interval['acc-z'].min()), xy=(min_z, interval['acc-z'].min()), xytext=(min_z, interval['acc-z'].min() - 750),
                         arrowprops=dict(facecolor='black', arrowstyle='simple'))
     
     plt.legend()
     axs[1].set_ylabel('Acceleration (mg)')
     plt.xlabel('Nº of measurements')
     fig.suptitle('Acceleration or deceleration', fontsize=16)
-    plt.get_current_fig_manager().window.state('zoomed')
     plt.subplots_adjust(hspace=0.55)
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/plot_accel.png', bbox_inches ="tight", dpi=200)
     plt.show()
         
@@ -168,7 +164,7 @@ def historic_compass_heading(list_of_intervals: list):
         axs[i].add_artist(centre_circle)
     
     fig.suptitle('Compass heading')
-    plt.get_current_fig_manager().window.state('zoomed')
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/pie_compass_heading.png', dpi=200)
     plt.show()
     
@@ -180,12 +176,20 @@ def correlations(list_of_intervals: list):
         # We need to exclude the last row and column for getting rid of the blank space
         corr_matrix = corr_matrix.iloc[:-1, :-1]  
         im = axs[i].matshow(corr_matrix, cmap='coolwarm')
-        cb = plt.colorbar(im, ax=axs[i])
+        fig.colorbar(im, ax=axs[i]) 
+        # Set the ticks of the x and y axis as the column names
+        axs[i].set_xticks(np.arange(len(corr_matrix.columns)), labels=corr_matrix.columns)
+        axs[i].set_yticks(np.arange(len(corr_matrix.columns)), labels=corr_matrix.columns)
         axs[i].set_title('Interval {}'.format(interval['interval'].iloc[0]))
+
+    axs[0].set_xticklabels(axs[0].get_xticklabels(), rotation=-45, ha='right')
+    axs[1].set_xticklabels(axs[1].get_xticklabels(), rotation=-45, ha='right')
+    axs[2].set_xticklabels(axs[2].get_xticklabels(), rotation=-45, ha='right')
+
 
     fig.suptitle('Correlation Heatmap', fontsize=16)
     plt.subplots_adjust(wspace=0.45)
-    plt.get_current_fig_manager().window.state('zoomed')
+    # plt.get_current_fig_manager().window.state('zoomed') # Only works on Windows
     plt.savefig('charts/correlation_heatmap.png', dpi=200)
     plt.show()
     
